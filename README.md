@@ -1,81 +1,82 @@
 # Intelligent Medical Diagnosis System
 
-A portfolio project that demonstrates a complete symptom-based machine-learning workflow: synthetic data generation, feature engineering, comparison of four classifiers, an interactive Streamlit dashboard, and optional PostgreSQL prediction history.
+I built this project to practise a full machine-learning workflow, from preparing data and comparing models to using a trained model in a web app.
 
-> **Safety and data note:** this repository uses generated synthetic records only. It is an educational demonstration, not a medical device, diagnosis, or treatment recommendation. Do not enter real patient information. The generated benchmark does not establish clinical accuracy or suitability.
+The dashboard takes symptoms and basic measurements, then shows estimates from the selected model. It can also save prediction history to PostgreSQL when a database is configured.
 
-## What is included
+## Project features
 
-- Reproducible generator for 12,000 synthetic records (configurable), with six simulated outcome classes.
-- Feature engineering for symptom count, fever flag, and age band.
-- Evaluation of Logistic Regression, Random Forest, SVM, and a TensorFlow/Keras neural network on the same stratified holdout set.
-- Saved model artifacts, a metrics report, and confusion matrix data from the training run.
-- Streamlit interface for entering symptoms and viewing a model's ranked estimates.
-- Optional PostgreSQL storage for prediction history. The app remains usable when PostgreSQL is not configured.
+- Creates a reproducible dataset of 12,000+ **synthetic records** by default.
+- Uses Pandas and NumPy for data preparation and feature engineering.
+- Adds symptom count, fever flag, and age band features.
+- Trains and compares Logistic Regression, Random Forest, SVM, and a neural network.
+- Reports accuracy, macro precision, macro recall, macro F1, and confusion matrices.
+- Runs a Streamlit dashboard for entering symptoms and viewing ranked model estimates.
+- Supports optional PostgreSQL storage for prediction history.
 
-The reported scores are calculated when you train the models; they depend on the generated data and random seed. They should not be presented as validated clinical performance.
+## Tools used
 
-## Run locally
+Python, TensorFlow/Keras, scikit-learn, Pandas, NumPy, Streamlit, PostgreSQL, and Docker Compose.
 
-1. Create and activate a virtual environment, then install dependencies:
+The neural network uses TensorFlow/Keras when TensorFlow is installed. The checked-in benchmark was generated in an environment without TensorFlow, so it used the scikit-learn MLP neural-network fallback.
 
-   ```bash
-   python -m venv .venv
-   # Windows: .venv\\Scripts\\activate
-   # macOS/Linux: source .venv/bin/activate
-   pip install -r requirements.txt
-   ```
+## Model results
 
-2. Generate the data, train all four models, and write evaluation outputs:
-
-   ```bash
-   python -m src.train --records 12000 --seed 42
-   ```
-
-3. Start the dashboard:
-
-   ```bash
-   streamlit run app.py
-   ```
-
-4. (Optional) Start PostgreSQL with Docker Compose, copy `.env.example` to `.env`, and run the app again:
-
-   ```bash
-   docker compose up -d db
-   ```
-
-Generated data and trained artifacts are intentionally git-ignored. The training command recreates them locally.
-
-## Project layout
-
-```text
-app.py                     Streamlit dashboard
-src/data.py                Synthetic cohort and feature engineering
-src/database.py            Optional PostgreSQL persistence
-src/train.py               Training and evaluation entry point
-artifacts/                 Local model files (generated)
-data/generated/            Generated synthetic CSV (generated)
-reports/                   Metrics and confusion matrices (generated)
-docker-compose.yml         Local PostgreSQL service
-```
-
-## Model evaluation
-
-The training pipeline uses a stratified 80/20 split and reports accuracy, macro precision/recall/F1, and a confusion matrix for each model. These are internal synthetic-data metrics only. For a real clinical study, the system would need an appropriately sourced, de-identified dataset, external validation, bias and safety assessment, and clinical oversight.
-
-### Reproduced benchmark (seed 42)
-
-The 12,000-record run in this repository produced the following holdout accuracies:
+I generated 12,000 records with random seed 42 and used a stratified 80/20 train/test split. The best accuracy in this run was **86.5%**.
 
 | Model | Accuracy | Macro F1 |
 | --- | ---: | ---: |
 | Logistic Regression | 86.5% | 86.5% |
-| Neural Network (scikit-learn fallback in this run) | 86.0% | 86.0% |
+| Neural Network | 86.0% | 86.0% |
 | SVM | 86.0% | 85.9% |
 | Random Forest | 85.5% | 85.5% |
 
-The full precision, recall, and confusion matrices are in `reports/model_metrics.json`. This run does not reproduce an 89% result. The resume claim should only use 89% if it comes from a separate, documented experiment; these generated records are not a substitute for clinical data.
+Full results and confusion matrices are in [`reports/model_metrics.json`](reports/model_metrics.json). These scores are from synthetic data and do not show how the models would perform on real patients.
 
-## PostgreSQL configuration
+## How to run
 
-Set `DATABASE_URL` in the environment (or a local `.env` file) to a PostgreSQL connection string. On a successful prediction, the app stores the selected model, predicted class, confidence, and symptom inputs. No database credentials are committed.
+From the project folder, create a virtual environment, install the packages, train the models, and start the dashboard:
+
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python -m src.train --records 12000 --seed 42
+streamlit run app.py
+```
+
+The training command generates the CSV, saves model files locally, and writes the evaluation reports. Generated data and model artifacts are ignored by Git and can be recreated with the command above.
+
+### PostgreSQL (optional)
+
+With Docker Desktop running, start the local database and create a local environment file:
+
+```powershell
+docker compose up -d db
+Copy-Item .env.example .env
+```
+
+Then start the dashboard with `streamlit run app.py`. The example database credentials are for local development only. Without a configured database, the dashboard still runs but does not save prediction history.
+
+## Project flow
+
+1. `src/data.py` generates the synthetic records and creates the engineered features.
+2. `src/train.py` splits the data, trains four models, and writes their evaluation results.
+3. `app.py` loads the trained models and shows ranked estimates for the entered demo symptoms.
+4. `src/database.py` saves and reads prediction history when PostgreSQL is configured.
+
+## Main files
+
+```text
+app.py                     Streamlit dashboard
+src/data.py                Synthetic data and feature engineering
+src/train.py               Training and model comparison
+src/database.py            PostgreSQL prediction history
+reports/model_metrics.csv  Model score summary
+reports/model_metrics.json Full metrics and confusion matrices
+docker-compose.yml         Local PostgreSQL setup
+```
+
+## Note about the data
+
+All records in this project are generated for learning and demonstration. They are not real patient records. This app is not a medical device and must not be used to diagnose or treat anyone. Please do not enter real patient information. Model scores are not medical advice or clinical validation.
