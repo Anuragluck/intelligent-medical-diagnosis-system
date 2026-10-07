@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.streamlit/secrets.toml
+artifacts/*
+!artifacts/.gitkeep
+data/generated/*
+!data/generated/.gitkeep
+reports/*
+!reports/.gitkeep
+!reports/model_metrics.csv
+!reports/model_metrics.json
+.pytest_cache/
+.DS_Store
