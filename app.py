@@ -72,7 +72,7 @@ with st.sidebar:
     st.subheader("Symptoms")
     symptoms = {name: st.checkbox(name.replace("_", " ").title()) for name in SYMPTOMS}
     model_name = st.selectbox("Model", ["Logistic Regression", "Random Forest", "SVM", "Neural Network"])
-    predict = st.button("Estimate", type="primary", use_container_width=True)
+    predict = st.button("Estimate", type="primary", width="stretch")
 
 col_a, col_b = st.columns([1.2, 1])
 with col_a:
@@ -97,7 +97,7 @@ with col_a:
         st.caption("Model confidence is not a probability that this is the true diagnosis.")
         display = pd.DataFrame(ranked, columns=["Outcome class", "Model score"])
         display["Model score"] = display["Model score"].map(lambda value: f"{value:.1%}")
-        st.dataframe(display, use_container_width=True, hide_index=True)
+        st.dataframe(display, width="stretch", hide_index=True)
         try:
             if save_prediction(model_name, diagnosis, float(confidence), raw_values):
                 st.caption("Prediction saved to configured PostgreSQL history.")
@@ -114,7 +114,7 @@ with col_b:
     if metrics_path.exists():
         st.caption("Current synthetic holdout comparison")
         metric_df = pd.read_csv(metrics_path)
-        st.dataframe(metric_df, use_container_width=True, hide_index=True)
+        st.dataframe(metric_df, width="stretch", hide_index=True)
 
 if database_url():
     with st.expander("Recent demo prediction history"):
@@ -124,7 +124,7 @@ if database_url():
                 history = pd.DataFrame(rows)
                 history["created_at"] = pd.to_datetime(history["created_at"]).dt.strftime("%Y-%m-%d %H:%M UTC")
                 history["confidence"] = history["confidence"].map(lambda value: f"{value:.1%}")
-                st.dataframe(history, use_container_width=True, hide_index=True)
+                st.dataframe(history, width="stretch", hide_index=True)
             else:
                 st.caption("No predictions have been saved yet.")
         except Exception as exc:

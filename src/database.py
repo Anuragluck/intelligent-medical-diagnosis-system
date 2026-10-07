@@ -5,7 +5,6 @@ from __future__ import annotations
 import os
 from datetime import datetime, timezone
 
-import psycopg
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -19,6 +18,8 @@ def save_prediction(model_name: str, diagnosis: str, confidence: float, inputs: 
     url = database_url()
     if not url:
         return False
+    import psycopg
+
     with psycopg.connect(url) as connection:
         connection.execute("""
             CREATE TABLE IF NOT EXISTS prediction_history (
@@ -44,6 +45,8 @@ def recent_predictions(limit: int = 20) -> list[dict]:
     url = database_url()
     if not url:
         return []
+    import psycopg
+
     with psycopg.connect(url, row_factory=psycopg.rows.dict_row) as connection:
         return connection.execute(
             "SELECT created_at, model_name, predicted_diagnosis, confidence "
